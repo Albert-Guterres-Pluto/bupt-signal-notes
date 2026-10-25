@@ -686,6 +686,10 @@ Q(s)=\sum_{k=0}^{m-n}c_ks^k\ \longleftrightarrow\ \sum_{k=0}^{m-n}c_k\delta^{(k)
 |---|---|---|---|
 | 单实极点 $p_i$ | $K_i=\left.(s-p_i)X(s)\right\rvert_{s=p_i}$ | $K_i\mathrm{e}^{p_it}u(t)$；ROC 在左时取 $-K_i\mathrm{e}^{p_it}u(-t)$ | $\mathrm{Re}\{s\}>\mathrm{Re}\{p_i\}$ 取 $u(t)$；反之取 $u(-t)$ |
 | 单复极点 $p_{1,2}=\alpha\pm\mathrm{j}\Omega_0$ | 求一个 $K=C+\mathrm{j}D$，另一项自动取共轭 $K^{*}$ | $2\mathrm{e}^{\alpha t}\left[C\cos\Omega_0t-D\sin\Omega_0t\right]u(t)$ | $\mathrm{Re}\{s\}>\alpha$（或 $<\alpha$ 时整体反号换 $u(-t)$）；合成**别漏乘 2** |
+
+> 上表复极点行的 $C,D$ 就是 $p_1$ 处留数 $K=\left.(s-p_1)X(s)\right|_{s=p_1}$ 的实部、虚部，**按 $K=C+\mathrm{j}D$ 直接取，不要再加负号**（本课习惯，与个别教材把留数记成 $\mathrm{j}C$ 的写法不同）。
+> 已用两个例子核过：$X(s)=\dfrac{s+a}{(s+a)^2+\Omega_0^2}$ 在 $p_1=-a+\mathrm{j}\Omega_0$ 的留数 $K=\tfrac12$，代入得 $2\cdot\tfrac12\mathrm{e}^{-at}\cos\Omega_0t=\mathrm{e}^{-at}\cos\Omega_0t$ ✓；
+> $X(s)=\dfrac{\Omega_0}{(s+a)^2+\Omega_0^2}$ 的留数 $K=-\tfrac{\mathrm{j}}{2}$（即 $C=0,D=-\tfrac12$），代入得 $2\cdot\tfrac12\mathrm{e}^{-at}\sin\Omega_0t=\mathrm{e}^{-at}\sin\Omega_0t$ ✓。
 | $r$ 重极点 $p$ | $K_k=\dfrac{1}{(r-k)!}\left.\dfrac{\mathrm{d}^{r-k}}{\mathrm{d}s^{r-k}}\left[(s-p)^rX(s)\right]\right\rvert_{s=p}$，$k=1,\dots,r$ | 每项 $\dfrac{t^{k-1}}{(k-1)!}\mathrm{e}^{pt}u(t)$ | $\mathrm{Re}\{s\}>\mathrm{Re}\{p\}$；$K_r$ 直接代 $s=p$ 不求导 |
 
 ### 5.3 同一个 $X(s)$、不同 ROC → 不同 $x(t)$
@@ -851,7 +855,7 @@ $$H(s)=H_0\frac{\prod_{j=1}^{m}(s-z_j)}{\prod_{i=1}^{n}(s-p_i)},\qquad H_0=\frac
 
 | 结论 | 收敛域 / 极点条件 | 等价说法 |
 |---|---|---|
-| **因果** | ROC 是 $\mathrm{Re}\{s\}>\tau_0$，即**最右极点右侧**的右半平面 | $h(t)=0\ (t<0)$ |
+| **因果** | ROC 是 $\mathrm{Re}\{s\}>\sigma_0$，即**最右极点右侧**的右半平面 | $h(t)=0\ (t<0)$ |
 | **稳定** | ROC **包含虚轴** $j\Omega$ | $\int\lvert h(t)\rvert\mathrm{d}t<\infty$ |
 | **因果且稳定** | **全部极点位于左半平面**（$\mathrm{Re}\{s\}<0$） | 最右极点也在虚轴左侧 |
 
@@ -899,7 +903,7 @@ $\Delta$ 称**特征式**：单环路增益之和取负、两两不接触环路�
 
 - 零输入响应只由初始状态决定（齐次解），求零状态响应必须把初始状态置零；"全响应 = 零输入 + 零状态"只对**线性**系统成立。
 - 共轭复根时齐次解写成 $e^{\sigma t}(A\cos+B\sin)$，不要保留复指数。
-- 因果 ≠ 稳定；因果系统 ROC 是 $\mathrm{Re}\{s\}>\tau_0$，**不能**据此说"极点都在左半平面"——那是再加稳定才推出的结论。
+- 因果 ≠ 稳定；因果系统 ROC 是 $\mathrm{Re}\{s\}>\sigma_0$，**不能**据此说"极点都在左半平面"——那是再加稳定才推出的结论。
 - 稳定性只看**极点**；虚轴有极点即不稳定，一个极点都不能漏看。
 
 # 第4章 滤波与滤波器
