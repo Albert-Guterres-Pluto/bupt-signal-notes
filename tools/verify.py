@@ -17,22 +17,39 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
 NOTES = os.path.join(ROOT, "笔记" if os.path.isdir(os.path.join(ROOT, "笔记")) else "notes")
 ASSETS = os.path.join(ROOT, "assets" if os.path.isdir(os.path.join(ROOT, "assets")) else "images")
 EXTRACT = os.path.join(HERE, "_extract")
 META_P = os.path.join(HERE, "deck-meta.json")
 
-DECKS = [
-    ("01-信号分析与处理概述", "slides01", r"_信号分析与处理_01_20260915"),
-    ("02-1-连续时间信号分析", "slides21", r"_信号分析与处理_2.1节-20260920"),
-    ("02-2-连续时间信号的频域分析", "slides22", r"_信号分析与处理_2.2节-20260920"),
-]
+# 课件清单: 工作区里自动从 _extract/ 发现; 仓库里没有 _extract, 由 deck-meta.json 提供
+DECKS = []
+try:
+    from decks import decks as _discover
+    DECKS = [(d["notes"], d["images"], os.path.basename(d["extract_dir"])) for d in _discover()]
+except Exception:
+    pass
 
-# 仓库里没有课件与提取产物时, 用 deck-meta.json 提供"幻灯片数 + 页码映射"
+# 去重（同一课件可能被 _extract 与 deck-meta 各登记一次）
+_seen = set(); _u = []
+for _d in DECKS:
+    if _d[0] in _seen:
+        continue
+    _seen.add(_d[0]); _u.append(_d)
+DECKS = _u
+
 META = {}
+_seen_meta = set()
 if os.path.exists(META_P):
     for d in json.load(open(META_P, encoding="utf-8"))["decks"]:
+        if d["dir"] in _seen_meta:
+            continue
+        _seen_meta.add(d["dir"])
         META[d["dir"]] = d
+        META[d["images"]] = d
+    if not DECKS:
+        DECKS = [(d["dir"], d["images"], d["dir"]) for d in META.values()]
 
 IMG_RE = re.compile(r'!\[([^\]]*)\]\(([^)]+)\)')
 SRC_LINE_RE = re.compile(r'^>\s*\*{0,2}来源\*{0,2}\s*[：:].*$', re.M)
@@ -61,7 +78,10 @@ for deck, asset_dir, extract_dir in DECKS:
     if os.path.exists(pagemap_p):
         pm = json.load(open(pagemap_p, encoding="utf-8"))
         total = max(int(k) for k in pm["slide_to_page"])
-    elif deck in META:
+    # 仓库模式（无 _extract）用 deck-meta.json 提供总页数
+    if total is None and extract_dir in META:
+        total = META[extract_dir]["slides"]
+    if total is None and deck in META:
         total = META[deck]["slides"]
     avail_pages = {int(re.findall(r"\d+", os.path.basename(f))[0])
                    for f in glob.glob(os.path.join(adir, "page-*.jpg"))}

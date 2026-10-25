@@ -5,24 +5,25 @@ import os, re, sys, glob, json
 sys.stdout.reconfigure(encoding="utf-8")
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
 EXTRACT = os.path.join(HERE, "_extract")
-
-DECKS = {
-    "slides01": r"_信号分析与处理_01_20260915",
-    "slides21": r"_信号分析与处理_2.1节-20260920",
-    "slides22": r"_信号分析与处理_2.2节-20260920",
-}
-maps = {}
+NOTES_DIR = os.path.join(ROOT, "笔记" if os.path.isdir(os.path.join(ROOT, "笔记")) else "notes")
 META_P = os.path.join(HERE, "deck-meta.json")
-for k, d in DECKS.items():
-    p = os.path.join(EXTRACT, d, "pagemap.json")
-    if os.path.exists(p):
-        maps[k] = json.load(open(p, encoding="utf-8"))["slide_to_page"]
+
+# 课件清单：工作区里自动从 _extract/ 发现（新增课件无需改本脚本）
+maps = {}
+try:
+    from decks import decks as _discover
+    for d in _discover():
+        pm = os.path.join(d["extract_dir"], "pagemap.json")
+        if os.path.exists(pm):
+            maps[d["images"]] = json.load(open(pm, encoding="utf-8"))["slide_to_page"]
+except Exception:
+    pass
+# 仓库模式：没有 _extract 时用 deck-meta.json
 if not maps and os.path.exists(META_P):
-    # 仓库模式: 用轻量元数据代替 _extract
     for d in json.load(open(META_P, encoding="utf-8"))["decks"]:
         maps[d["images"]] = d["slide_to_page"]
-NOTES_DIR = os.path.join(ROOT, "笔记" if os.path.isdir(os.path.join(ROOT, "笔记")) else "notes")
 
 # 说明文字与链接可能在同一行不同位置: 先取每张图的 alt, 再取链接
 ENTRY = re.compile(r'!\[([^\]]*)\]\(([^)]+)\)')
@@ -31,7 +32,7 @@ PAGE = re.compile(r'第\s*([0-9]+)\s*页')
 FNAME = re.compile(r'page-(\d{4})\.jpg')
 
 bad, checked, noanno = [], 0, 0
-for md in sorted(glob.glob(os.path.join(NOTES_DIR, "**", "*.md"), recursive=True)):
+for md in sorted(glob.glob(os.path.join(ROOT, "笔记", "**", "*.md"), recursive=True)):
     rel = os.path.relpath(md, ROOT)
     txt = open(md, encoding="utf-8").read()
     for m in ENTRY.finditer(txt):
@@ -41,8 +42,9 @@ for md in sorted(glob.glob(os.path.join(NOTES_DIR, "**", "*.md"), recursive=True
             continue
         file_page = int(fm.group(1))
         deck = None
-        for k in DECKS:
-            if f"{k}/" in link.replace("\\", "/"):
+        link_n = link.replace("\\", "/")
+        for k in maps:
+            if f"{k}/" in link_n:
                 deck = k
         if deck is None:
             bad.append(f"[无法判定所属课件] {rel} -> {link}")

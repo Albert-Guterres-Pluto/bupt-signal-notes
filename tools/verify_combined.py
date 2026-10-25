@@ -5,7 +5,7 @@ import os, re, sys
 sys.stdout.reconfigure(encoding="utf-8")
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-P = os.path.join(ROOT, "信号分析与处理-完整笔记.md")
+P = os.path.join(ROOT, "signal-notes.md" if os.path.isdir(os.path.join(ROOT,"notes")) else "信号分析与处理-完整笔记.md")
 
 t = open(P, encoding="utf-8").read()
 imgs = re.findall(r'!\[[^\]]*\]\(([^)]+)\)', t)

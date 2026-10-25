@@ -13,9 +13,7 @@ import os, re, sys, glob, collections
 sys.stdout.reconfigure(encoding="utf-8")
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-_WS_NOTES = os.path.join(ROOT, "笔记")
-NOTES = _WS_NOTES if os.path.isdir(_WS_NOTES) else os.path.join(ROOT, "notes")
-CRAM = os.path.join(NOTES, "00-抱佛脚版") if os.path.isdir(_WS_NOTES) else os.path.join(ROOT, "cram")
+NOTES = os.path.join(ROOT, "笔记")
 
 # 常见正当叠字双字词
 OK2 = set("""
@@ -56,14 +54,14 @@ def legit(prev_ch, pair, ctx):
 
 ALLOW_CTX = ["线性性质", "性性质", "形形式", "形形状", "原原理", "原原信号", "级级联", "级级数",
              "带带宽", "态态度", "面面积", "体体积", "信信号", "观观察", "题题面", "大大扩展",
-             "刚刚过去", "实实在在", "在在可以", "根根离散", "件件", "点点点"]
+             "刚刚过去", "实实在在", "在在可以", "根根离散", "件件", "点点点",
+             # 正规术语：这些词的相邻两字天然相同，不是损坏
+             "部分分式", "部分分数", "分分式", "分分析", "分分解", "初始条件时", "件时"]
 
 suspects = []
 stats = collections.Counter()
 
-_SCAN = sorted(set(glob.glob(os.path.join(NOTES, "**", "*.md"), recursive=True))
-               | set(glob.glob(os.path.join(CRAM, "**", "*.md"), recursive=True)))
-for md in _SCAN:
+for md in sorted(glob.glob(os.path.join(NOTES, "**", "*.md"), recursive=True)):
     rel = os.path.relpath(md, ROOT)
     raw = open(md, "rb").read()
     if raw.startswith(b"\xef\xbb\xbf"):
@@ -87,8 +85,9 @@ for md in _SCAN:
         if any(a in ctx for a in ALLOW_CTX):
             continue
         suspects.append(f"[重复字 {w}] {rel}:{line} … {ctx}")
-    # '件' 出现在明显应为 '课' 的语境 (排除 文件/组件/事件/条件/硬件 等正当用法)
-    for m in re.finditer(r'件(件|堂|程|时)', txt):
+    # '件' 出现在明显应为 '课' 的语境。注意 "条件时" / "事件时" 等是正常词，
+    # 只匹配真正的损坏形态（"件件"、"件堂"、"件程"），不要匹配单字"件+时"。
+    for m in re.finditer(r'件(件|堂|程)(?!时)', txt):
         line = txt[:m.start()].count("\n") + 1
         suspects.append(f"[疑似 课->件 替换] {rel}:{line} … {txt[max(0,m.start()-25):m.start()+25]!r}")
     # 反向: 统计正当用法的 '件' 词频, 便于人工核对

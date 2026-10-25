@@ -13,7 +13,8 @@ GREEK = {
     "α": r"\alpha", "β": r"\beta", "γ": r"\gamma", "δ": r"\delta", "ε": r"\varepsilon",
     "ζ": r"\zeta", "η": r"\eta", "θ": r"\theta", "ι": r"\iota", "κ": r"\kappa",
     "λ": r"\lambda", "μ": r"\mu", "ν": r"\nu", "ξ": r"\xi", "π": r"\pi", "ρ": r"\rho",
-    "σ": r"\sigma", "τ": r"\tau", "υ": r"\upsilon", "φ": r"\varphi", "χ": r"\chi",
+    "ς": r"\varsigma", "σ": r"\sigma", "τ": r"\tau", "υ": r"\upsilon",
+    "φ": r"\varphi", "χ": r"\chi",
     "ψ": r"\psi", "ω": r"\omega", "Γ": r"\Gamma", "Δ": r"\Delta", "Θ": r"\Theta",
     "Λ": r"\Lambda", "Ξ": r"\Xi", "Π": r"\Pi", "Σ": r"\Sigma", "Φ": r"\Phi",
     "Ψ": r"\Psi", "Ω": r"\Omega",
@@ -29,19 +30,49 @@ def _txt(el):
     return "".join(t.text or "" for t in el.iter(M + "t"))
 
 
-GREEK_UP = "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ"
-GREEK_LO = "αβγδεζηθικλμνξοπρστυφχψω"
+# 数学字母区（U+1D6A8–U+1D7CB）的希腊字母排列由 Unicode 规范固定。下列顺序已按
+# unicodedata.name() 逐码点核对过（曾三次因手写字符串漏字导致错位，故此处只用
+# 名称列表 + 码点序号，不再手写希腊字符）：
+#   大写 25 位（+0..+24）：ALPHA..RHO, THETASYMBOL(+17), SIGMA..OMEGA
+#   小写 26 位（+0..+25）：ALPHA..RHO, FINALSIGMA(+17), SIGMA..OMEGA
+UPPER_SEQ = ["ALPHA", "BETA", "GAMMA", "DELTA", "EPSILON", "ZETA", "ETA", "THETA",
+             "IOTA", "KAPPA", "LAMDA", "MU", "NU", "XI", "OMICRON", "PI", "RHO",
+             "THETASYMBOL", "SIGMA", "TAU", "UPSILON", "PHI", "CHI", "PSI", "OMEGA"]
+LOWER_SEQ = ["ALPHA", "BETA", "GAMMA", "DELTA", "EPSILON", "ZETA", "ETA", "THETA",
+             "IOTA", "KAPPA", "LAMDA", "MU", "NU", "XI", "OMICRON", "PI", "RHO",
+             "FINALSIGMA", "SIGMA", "TAU", "UPSILON", "PHI", "CHI", "PSI", "OMEGA"]
+
+NAME2CH = {
+    "ALPHA": ("Α", "α"), "BETA": ("Β", "β"), "GAMMA": ("Γ", "γ"), "DELTA": ("Δ", "δ"),
+    "EPSILON": ("Ε", "ε"), "ZETA": ("Ζ", "ζ"), "ETA": ("Η", "η"), "THETA": ("Θ", "θ"),
+    "THETASYMBOL": ("ϑ", "ϑ"),
+    "IOTA": ("Ι", "ι"), "KAPPA": ("Κ", "κ"), "LAMDA": ("Λ", "λ"), "MU": ("Μ", "μ"),
+    "NU": ("Ν", "ν"), "XI": ("Ξ", "ξ"), "OMICRON": ("Ο", "ο"), "PI": ("Π", "π"),
+    "RHO": ("Ρ", "ρ"), "FINALSIGMA": ("Σ", "ς"), "SIGMA": ("Σ", "σ"), "TAU": ("Τ", "τ"),
+    "UPSILON": ("Υ", "υ"), "PHI": ("Φ", "φ"), "CHI": ("Χ", "χ"), "PSI": ("Ψ", "ψ"),
+    "OMEGA": ("Ω", "ω"), "NABLA": ("∇", "∇"),
+}
+_UPPER_BASES = (0x1D6A8, 0x1D6E2, 0x1D71C, 0x1D756, 0x1D790)   # 粗/斜/粗斜/无衬黑粗/无衬黑粗斜
+_LOWER_BASES = (0x1D6C2, 0x1D6FC, 0x1D736, 0x1D770, 0x1D7AA)
 
 MATH_GREEK = {}
-for _i, _c in enumerate(GREEK_UP):
-    for _base in (0x1D6A8, 0x1D6E2, 0x1D71C, 0x1D756, 0x1D790):   # 粗/斜/粗斜/无衬线粗/无衬线粗斜
-        MATH_GREEK[_base + _i] = _c
-for _i, _c in enumerate(GREEK_LO):
-    for _base in (0x1D6C2, 0x1D6FC, 0x1D736, 0x1D770, 0x1D7AA):
-        MATH_GREEK[_base + _i] = _c
+for _base in _UPPER_BASES:
+    for _i, _nm in enumerate(UPPER_SEQ):
+        MATH_GREEK[_base + _i] = NAME2CH[_nm][0]
+for _base in _LOWER_BASES:
+    for _i, _nm in enumerate(LOWER_SEQ):
+        MATH_GREEK[_base + _i] = NAME2CH[_nm][1]
+# 每块 OMEGA 之后一位是 NABLA（小写块之后是 PARTIAL DIFFERENTIAL）
+for _base in _UPPER_BASES:
+    MATH_GREEK[_base + 25] = "∇"
+for _base in _LOWER_BASES:
+    MATH_GREEK[_base + 25] = "∂"
+# 变体符号（epsilon/theta/kappa/phi/rho/pi 的 symbol 形态）——这些是 THETA/PHI 等的
+# 专用 "symbol" 码位，Unicode 名称本身就是 ϑ/ϕ 等，按 Unicode 语义映射
 MATH_GREEK.update({
-    0x1D6DB: "∂", 0x1D6DC: "ε", 0x1D6DD: "ϑ", 0x1D6DE: "ϰ", 0x1D6DF: "ϕ",
-    0x1D6E0: "ϱ", 0x1D6E1: "ϖ", 0x1D7CA: "Ϝ", 0x1D7CB: "ϝ",
+    0x1D6DC: "ε", 0x1D6DD: "ϑ", 0x1D6DE: "ϰ", 0x1D6DF: "ϕ",
+    0x1D6E0: "ϱ", 0x1D6E1: "ϖ",
+    0x1D7CA: "Ϝ", 0x1D7CB: "ϝ",
     0x2212: "-", 0x00a0: " ", 0x2206: r"\Delta ", 0x2044: "/",
 })
 

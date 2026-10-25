@@ -13,15 +13,50 @@ import os, re, sys, glob
 sys.stdout.reconfigure(encoding="utf-8")
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-NOTES = os.path.join(ROOT, "笔记" if os.path.isdir(os.path.join(ROOT, "笔记")) else "notes")
-NOTES_NAME = os.path.basename(NOTES)   # 工作区里是"笔记", 仓库里是"notes"
-OUT = os.path.join(ROOT, "signal-notes.md" if not os.path.isdir(os.path.join(ROOT, "笔记")) else "信号分析与处理-完整笔记.md")
+sys.path.insert(0, HERE)
+sys.path.insert(0, HERE)
+from _paths import NOTES_DIR, NOTES_NAME, COMBINED_OUT
+NOTES = NOTES_DIR
+OUT = COMBINED_OUT
 
-DECKS = [
-    ("01-信号分析与处理概述", "第一篇　第一章 绪论", "《信号分析与处理》01_20260915.pptx，96 页"),
-    ("02-1-连续时间信号分析", "第二篇　2.1 连续时间信号的时域分析", "《信号分析与处理》2.1节-20260920.pptx，121 页"),
-    ("02-2-连续时间信号的频域分析", "第三篇　2.2 连续时间信号的频域分析", "《信号分析与处理》2.2节-20260920.pptx，144 页"),
+# 篇名与展示顺序（按课程讲授顺序）。用课件文件名里的关键字匹配（不用目录名），
+# 这样工作区（笔记/，目录名带 02-1/02-2/02-3 前缀）与仓库（notes/，目录名不带前缀）
+# 两种布局都能正常工作。
+PART_SPECS = [
+    (r"01_",                              "第一篇　第一章 绪论"),
+    (r"2\.1节",                           "第二篇　2.1 连续时间信号的时域分析"),
+    (r"2\.2节",                           "第三篇　2.2 连续时间信号的频域分析"),
+    (r"2\.3节",                           "第四篇　2.3 连续时间信号的复频域分析"),
+    (r"第3章",                            "第五篇　第三章 连续线性时不变系统的分析"),
+    (r"第4章",                            "第六篇　第四章 滤波与滤波器"),
 ]
+
+
+def build_decks():
+    """优先用 decks.py 自动发现（工作区）；仓库里没有 _extract 时回退到 deck-meta.json。"""
+    found = []
+    try:
+        from decks import decks as discover
+        found = discover()
+    except Exception:
+        found = []
+    if not found:
+        meta_p = os.path.join(HERE, "deck-meta.json")
+        if os.path.exists(meta_p):
+            import json
+            for d in json.load(open(meta_p, encoding="utf-8"))["decks"]:
+                found.append(dict(source=d["source"], slides=d["slides"],
+                                  notes=d["dir"]))
+    out = []
+    for pat, title in PART_SPECS:
+        for d in found:
+            if re.search(pat, d["source"]):
+                out.append((d["notes"], title, f"《{d['source']}》，{d['slides']} 页"))
+                break
+    return out
+
+
+DECKS = build_decks()
 FENCE = re.compile(r'^\s*(```|~~~)')
 H_RE = re.compile(r'^(#{1,6})(\s+)(.*)$')
 
@@ -115,7 +150,7 @@ def main():
             idx += 1
             text = open(f, encoding="utf-8").read()
             title, rest = split_title(text)
-            # 图片路径: 合成文件在根目录, 用 assets/ 或 images/
+            # 图片路径: 合成文件在根目录, 用 assets/...
             rest = rest.replace("](../../assets/", "](assets/").replace("](../../images/", "](images/")
             # 源笔记里的同级 md 链接 -> 指向真实文件
             rest = re.sub(r'\]\(\s*<?\.?/?([0-9A-Za-z\-]+\.md)>?\s*\)',

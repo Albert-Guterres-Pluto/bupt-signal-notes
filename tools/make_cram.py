@@ -10,15 +10,18 @@ import os, re, sys, glob
 sys.stdout.reconfigure(encoding="utf-8")
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-_NOTES = os.path.join(ROOT, "笔记") if os.path.isdir(os.path.join(ROOT, "笔记")) else os.path.join(ROOT, "notes")
-_cram_in_notes = os.path.join(_NOTES, "00-抱佛脚版")
-SRC = _cram_in_notes if os.path.isdir(_cram_in_notes) else os.path.join(ROOT, "cram")
-OUT = os.path.join(ROOT, "信号分析与处理-抱佛脚速记.md" if os.path.isdir(os.path.join(ROOT, "笔记")) else "cram-sheet.md")
+sys.path.insert(0, HERE)
+from _paths import CRAM_DIR, CRAM_OUT
+SRC = CRAM_DIR
+OUT = CRAM_OUT
 
 ORDER = [
     ("01-概念公式速记.md", "第一篇　概念与分类（绪论）", "《信号分析与处理》01_20260915.pptx，96 页"),
     ("02-1-典型信号与基本运算速记.md", "第二篇　典型信号与基本运算（2.1）", "《信号分析与处理》2.1节-20260920.pptx，121 页"),
-    ("02-2-傅里叶分析速记.md", "第三篇　傅里叶分析（2.2）", "《信号分析与处理》2.2节-20260920.pptx，144 页"),
+    ("02-2-频域分析速记.md", "第三篇　傅里叶分析（2.2）", "《信号分析与处理》2.2节-20261007.pptx，152 页"),
+    ("02-3-复频域分析速记.md", "第四篇　复频域分析（2.3）", "《信号分析与处理》2.3节20261008.pptx，87 页"),
+    ("03-04-系统与滤波器速记.md", "第五篇　连续系统分析与滤波器（第3、4章）",
+     "《信号分析与处理》第3章-20261020.pptx（145 页）+ 第4章-20261020.pptx（101 页）"),
 ]
 
 # 抱佛脚版禁止出现的东西
@@ -70,7 +73,7 @@ def main():
                 line = text[:m.start()].count("\n") + 1
                 problems.append(f"{fname}:{line} 出现{what}: {m.group(0)[:40]!r}")
         _, rest = strip_title(text)
-        rest = rest.replace("](../../assets/", "](assets/").replace("](../../images/", "](images/")
+        rest = rest.replace("](../../assets/", "](assets/")
         sections.append((title, src, rest, fname))
         total_chars += len(re.sub(r'\s', '', rest))
 
