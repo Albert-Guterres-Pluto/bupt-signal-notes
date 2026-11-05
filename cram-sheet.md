@@ -544,7 +544,7 @@ $$\boxed{\ F_n=\frac{1}{T}F_0(\mathrm{j}n\Omega_0)=\frac{1}{T}F_0(\mathrm{j}\Ome
 
 | 题型（识别特征） | 解法入口 | 关键提醒 |
 |---|---|---|
-| **①** **求周期信号的傅里叶级数** | ① 选形式（三角/谐波/指数，看题目要哪种）② 算 $a_0,a_n,b_n$ 或 $F_n$：定积分区间取**一个周期**，按分段函数分段积分 ③ 利用对称性省事：偶→$b_n=0$、奇→$a_n=0$、半波对称→只含奇次 ④ 写出级数；要频谱就再合成 $c_n=\sqrt{a_n^2+b_n^2}$、$\varphi_n=\arctan\!\left(-\dfrac{b_n}{a_n}\right)$ | 积分在一个周期内做即可；系数是**平均值**不是和；合成幅度相位时必须先统一成**余弦** |
+| **①** **求周期信号的傅里叶级数** | ① 选形式（三角/谐波/指数，看题目要哪种）② 算 $a_0,a_n,b_n$ 或 $F_n$：定积分区间取**一个周期**，按分段函数分段积分 ③ 利用波形对称性省事：偶→$b_n=0$、奇→$a_n=0$、半波对称→只含奇次 ④ 写出级数；要频谱就再合成 $c_n=\sqrt{a_n^2+b_n^2}$、$\varphi_n=\arctan\!\left(-\dfrac{b_n}{a_n}\right)$ | 积分在一个周期内做即可；系数是**平均值**不是和；合成幅度相位时必须先统一成**余弦** |
 | **②** **求非周期信号的傅里叶变换 $X(\Omega)$** | ① 先查**变换对表** ② 再看能否用性质拼出来（时移/频移/尺度/微分/积分/卷积）③ 都不行才按定义直接积分 ④ 用 $X(0)=\displaystyle\int x\mathrm{d}t$ 或 $x(0)=\dfrac{1}{2\pi}\displaystyle\int X\mathrm{d}\Omega$ 自检 | 优先用性质，直接积分最费时；反向也要会：由频谱反推时域同理（对偶性、线性、时移反推） |
 | **③** **求一般周期信号的傅里叶变换** | **四步法**：① 求傅里叶系数 $F_n=\dfrac{1}{T}\displaystyle\int_{T}x(t)\mathrm{e}^{-\mathrm{j}n\Omega_0 t}\mathrm{d}t$ ② 写成 $\sum F_n\mathrm{e}^{\mathrm{j}n\Omega_0 t}$ ③ 逐项用 $\mathrm{e}^{\mathrm{j}n\Omega_0 t}\leftrightarrow2\pi\delta(\Omega-n\Omega_0)$ ④ 得 $X(\Omega)=2\pi\sum F_n\delta(\Omega-n\Omega_0)$ | 冲激**强度是 $2\pi F_n$**，不是 $F_n$；这是**频谱密度**，谱线"高度"是冲激强度，别当有限幅度 |
 | **④** **由单脉冲频谱求周期信号系数**（题面给"用单脉冲 $F_0$ 表示"） | ① 先求单脉冲的频谱 $F_0(\mathrm{j}\Omega)$ ② 用 $F_n=\dfrac{1}{T}F_0(\mathrm{j}n\Omega_0)$ 取样 ③ 回代级数或变换式 | 别漏 $\dfrac{1}{T}$；这本质是"时域周期延拓 ⇔ 频域离散化" |
@@ -752,7 +752,7 @@ Q(s)=\sum_{k=0}^{m-n}c_ks^k\ \longleftrightarrow\ \sum_{k=0}^{m-n}c_k\delta^{(k)
 | **③** **求初值 $x(0^{+})$ / 终值 $x(\infty)$** | ① **先查条件**：初值要求 $t<0$ 时 $x=0$ 且 $t=0$ 无冲激（$X(s)$ 非真分式先长除）；终值要求 $sX(s)$ 极点全在左半平面（$s=0$ 至多一重）② 条件满足再算 $\lim\limits_{s\to\infty}sX(s)$ 或 $\lim\limits_{s\to0}sX(s)$ | 条件不满足时代出来的是**假值**；初值给的是 $x(0^{+})$ 不是 $x(0^{-})$；$t=0$ 处有冲激时初值定理反映不出来 |
 | **④** **判断因果性 / 稳定性（用 ROC 或极点）** | ① 求全部极点并标在 $s$ 平面 ② 定 ROC ③ 判因果：ROC 在最右极点**右侧** ④ 判稳定：ROC **包含虚轴** ⑤ 因果且稳定：**全部极点位于左半平面** | 因果 ≠ 稳定，只能"因果 + ROC 含虚轴"才能推出极点全左；虚轴上只要有极点（哪怕一重）就不是稳定系统 |
 | **⑤** **由微分方程求 $H(s)$ 与 $h(t)$** | ① 在**零状态**下把 $\dfrac{\mathrm{d}^k}{\mathrm{d}t^k}$ 换成 $s^k$ ② 得 $H(s)=\dfrac{\sum b_k s^k}{\sum a_k s^k}$ ③ 求极点定 ROC ④ 逆变换得 $h(t)$ | 必须零状态；$H(s)$ 与 $h(t)$ 互为拉氏变换对 |
-| 6 | **判断拉氏与傅氏变换能否互推** | ① 求出极点、定 ROC ② 看**虚轴 $s=\mathrm{j}\Omega$ 是否落在 ROC 内** ③ 在：$X_F(\Omega)=\left.X(s)\right|_{s=\mathrm{j}\Omega}$ ④ 不在且无虚轴极点：傅氏不存在（但拉氏仍存在）⑤ 虚轴有极点：要补 $\pi A_k\delta$ 与 PV 项 | 不能无条件直接代入 $s=\mathrm{j}\Omega$；虚轴上 $r$ 重极点对应 $\delta^{(r-1)}$ |
+| **⑥** **判断拉氏与傅氏变换能否互推** | ① 求出极点、定 ROC ② 看**虚轴 $s=\mathrm{j}\Omega$ 是否落在 ROC 内** ③ 在：$X_F(\Omega)=\left.X(s)\right\vert_{s=\mathrm{j}\Omega}$ ④ 不在且无虚轴极点：傅氏不存在（但拉氏仍存在）⑤ 虚轴有极点：要补 $\pi A_k\delta$ 与 PV 项 | 不能无条件直接代入 $s=\mathrm{j}\Omega$；虚轴上 $r$ 重极点对应 $\delta^{(r-1)}$ |
 | **⑦** **由信号求单边/双边变换的区别** | ① 看题目给的是单边还是双边 ② 单边只看 $t\ge0^{-}$ 段（初始条件进微分性质）③ 双边要关心 $t<0$ 段并定 ROC ④ 时移性质：单边要求 $t_0>0$ 且因果 | 单边时移 $x(t-t_0)u(t-t_0)$ 需要 $t_0>0$，否则要补 $t<0$ 段修正项 |
 
 ## 8. 易错点（一行一条）
@@ -1018,7 +1018,7 @@ $\mathrm{Si}(y)$：$\mathrm{Si}(0)=0$、奇函数、$y=\pm\pi$ 处取极值；�
 | 3 dB 频率 | 由通带 $\Omega_c=\dfrac{\Omega_p}{\left(10^{0.1A_p}-1\right)^{1/(2N)}}$；或由阻带 $\Omega_c=\dfrac{\Omega_s}{\left(10^{0.1A_s}-1\right)^{1/(2N)}}$ |
 | **实际极点** | $\boxed{p_k=\Omega_c\,e^{\mathrm{j}\pi(2k+N+1)/(2N)}}$，$k=0,\dots,N-1$（归一化极点即取 $\Omega_c=1$；左半平面取 $N$ 个） |
 | 归一化系统函数 | $H(p)=\dfrac{1}{\prod_{k=0}^{N-1}(p-p_k)}$，$p=s/\Omega_c$（$N=1,2,3$ 时分别为 $p+1$、$p^2+1.4142p+1$、$(p+1)(p^2+p+1)$） |
-| 反归一化 | $H(s)=\left.H(p)\right|_{p=s/\Omega_c}=\dfrac{\Omega_c^{N}}{\prod_{k=0}^{N-1}(s-p_k\Omega_c)}$ |
+| 反归一化 | $H(s)=\left.H(p)\right\vert_{p=s/\Omega_c}=\dfrac{\Omega_c^{N}}{\prod_{k=0}^{N-1}(s-p_k\Omega_c)}$ |
 
 **三个特点**：① **3 dB 点及其不变性**——$\Omega=\Omega_c$ 时 $\lvert H\rvert^2=1/2$、衰减恒为 3 dB，与 $N$ 无关；② **单调下降**；③ **最大平坦**（$\Omega=0$ 处各阶导数除最高阶为零，故称"最平响应滤波器"）。有限平面内**只有极点、零点全在 $s=\infty$** ⇒ **全极点型**。
 
@@ -1057,7 +1057,7 @@ $\mathrm{Si}(y)$：$\mathrm{Si}(0)=0$、奇函数、$y=\pm\pi$ 处取极值；�
 | **②** **求相延时 / 群延时** | ① 相时延（单一正弦分量的时移）$\tau_p=-\dfrac{\varphi(\Omega)}{\Omega}$ ② 群时延（包络/整体的时移）$\tau_g=-\dfrac{\mathrm{d}\varphi(\Omega)}{\mathrm{d}\Omega}$ ③ 无失真时两者都恒等于 $t_0$ | 相位取**主值**时要留意 $\pm\pi$ 跳变；群时延为负表示"超前"，物理上不可实现 |
 | **③** **滤波器指标换算（dB ↔ 绝对量）** | ① 由 $\varepsilon$ 求通带衰减 $A_p=10\lg(1+\varepsilon^2)$ ② 由 $A$ 求阻带衰减 $A_s=20\lg A$ ③ 反算：$\varepsilon^2=10^{0.1A_p}-1$、$A=10^{0.1A_s/2}=10^{A_s/20}$ ④ 由指标反推 $\Omega_c$ | 功率/幅度**平方**比用 $10\lg$、幅度比用 $20\lg$；$A_p$ 是**最大**衰减、$A_s$ 是**最小**衰减，不等式方向别写反 |
 | **④** **判断理想低通能否实现 / 求其响应参数** | ① 由 $H(\mathrm{j}\Omega)$ 反变换求 $h(t)=\dfrac{\Omega_c}{\pi}\mathrm{Sa}\left[\Omega_c(t-t_0)\right]$ ② 看 $t<t_0$（或 $t<0$）是否已非零 → 判因果 ③ 阶跃响应用 $\mathrm{Si}$ 函数 ④ 上升时间 $t_r=\dfrac{2\pi}{\Omega_c}=\dfrac{1}{f_c}$ | 理想低通**必非因果**、物理不可实现；吉布斯过冲约 **9%**，增大 $\Omega_c$ 只让振铃变窄、**不改变**过冲相对幅度 |
-| 5 | **巴特沃斯滤波器设计** | **四步**：① 由指标求阶数 $N\ge\dfrac{\lg\sqrt{\dfrac{10^{0.1A_s}-1}{10^{0.1A_p}-1}}}{\lg(\Omega_s/\Omega_p)}$，**向上取整** ② 由通带（或阻带）求 $\Omega_c$ ③ 求极点 $p_k=\Omega_c\mathrm{e}^{\mathrm{j}\pi(2k+N+1)/(2N)}$ 或查表得归一化 $H(p)$ ④ 反归一化 $H(s)=\left.H(p)\right|_{p=s/\Omega_c}$，分子补 $\Omega_c^N$ | $N$ 必须**向上取整**；$2N$ 个极点**只取左半平面 $N$ 个**；$\Omega_c$ 与 $\Omega_p$ 只在 $A_p=3$ dB 时重合；分子漏 $\Omega_c^N$ 会导致 $\lvert H(\mathrm{j}0)\rvert\ne1$ |
+| **⑤** **巴特沃斯滤波器设计** | **四步**：① 由指标求阶数 $N\ge\dfrac{\lg\sqrt{\dfrac{10^{0.1A_s}-1}{10^{0.1A_p}-1}}}{\lg(\Omega_s/\Omega_p)}$，**向上取整** ② 由通带（或阻带）求 $\Omega_c$ ③ 求极点 $p_k=\Omega_c\mathrm{e}^{\mathrm{j}\pi(2k+N+1)/(2N)}$ 或查表得归一化 $H(p)$ ④ 反归一化 $H(s)=\left.H(p)\right\vert_{p=s/\Omega_c}$，分子补 $\Omega_c^N$ | $N$ 必须**向上取整**；$2N$ 个极点**只取左半平面 $N$ 个**；$\Omega_c$ 与 $\Omega_p$ 只在 $A_p=3$ dB 时重合；分子漏 $\Omega_c^N$ 会导致 $\lvert H(\mathrm{j}0)\rvert\ne1$ |
 | **⑥** **高通/带通/带阻滤波器设计（频率变换）** | ① 检查**几何对称** $\Omega_0^2=\Omega_{p1}\Omega_{p2}=\Omega_{s1}\Omega_{s2}$，不满足先调整指标 ② 查表把目标指标换算成**归一化低通**指标 $\lambda_p,\lambda_s$（$\lambda_p=1/a$）③ 按巴特沃斯设计归一化低通 $H_{lp}(p)$ ④ 代换 $p=q(s)$ 得 $H_d(s)$ | 顺序**不能反**（先换算指标 → 设计低通 → 最后换 $s$）；带通/带阻的 $\lambda_s$ **互为倒数**，写反直接算错阶数；$N$ 阶低通经带通/带阻变换得 **$2N$ 阶** |
 | **⑦** **指标不对称时的预处理** | ① 由中心频率定参考：$\Omega_0=\sqrt{\Omega_{p1}\Omega_{p2}}$（或用阻带算）② 阻带调整：$\hat\Omega_{s1}=\dfrac{\Omega_0^2}{\Omega_{s2}}$，并取 $A_s=\max\{A_{s1},A_{s2}\}$ ③ 通带调整：$\hat\Omega_{p1}=\dfrac{\Omega_0^2}{\Omega_{p2}}$，并取 $A_p=\min\{A_{p1},A_{p2}\}$ | 口诀：**偏松的一侧收紧到对称位置，衰减取两侧更严者**；不先调整就套公式，设计出的滤波器不满足一侧指标 |
 

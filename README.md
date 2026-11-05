@@ -13,7 +13,7 @@
 | 想要什么 | 打开哪个 |
 |---|---|
 | **考前突击**（1 小时过一遍） | [cram-sheet.md](cram-sheet.md) —— 只有概念、公式、性质、成立条件，**无例题、无练习、无图** |
-| **打印带走** | [cram-sheet.pdf](cram-sheet.pdf) —— 同一份内容的 A4 打印版（26 页，带书签目录，LaTeX 排版） |
+| **打印带走** | [cram-sheet.pdf](cram-sheet.pdf) —— 同一份内容的 A4 打印版（28 页，带书签目录，LaTeX 排版） |
 | **通读 / 检索 / 打印** | [signal-notes.md](signal-notes.md) —— 45 章合并为一份，含目录跳转与 184 张精选插图 |
 | **按章查阅** | [notes/](notes) —— 每份课件一篇，每篇带索引，单章文件小、加载快 |
 
