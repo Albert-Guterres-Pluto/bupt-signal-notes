@@ -38,7 +38,8 @@ PREAMBLE = r"""\documentclass[UTF8,a4paper,zihao=5]{ctexart}
 \usepackage[top=1.9cm,bottom=1.9cm,left=1.6cm,right=1.6cm,headsep=0.4cm,footskip=0.9cm]{geometry}
 \usepackage{amsmath,amssymb,mathtools}
 \usepackage{mathrsfs}
-\usepackage{booktabs,longtable,array,tabularx,multirow,makecell}
+\usepackage{booktabs,longtable,array,tabularx,xltabular,multirow,makecell}
+\usepackage{colortbl}
 \usepackage{enumitem}
 \usepackage{needspace}
 \usepackage{xcolor}
@@ -58,6 +59,10 @@ PREAMBLE = r"""\documentclass[UTF8,a4paper,zihao=5]{ctexart}
 
 \definecolor{accent}{HTML}{1F5FA9}
 \definecolor{rulegray}{HTML}{B8C4D0}
+
+% 表格行间细横线：specialrule 不额外占行高；颜色取中灰，太浅会在 PDF 里看不见
+\newcommand{\rowrule}{%
+  \arrayrulecolor{black!38}\specialrule{0.5pt}{0.7pt}{0.7pt}\arrayrulecolor{black}}%
 
 % 顶层（每篇）用 section*，不加编号；小节标题自带"一、二、"与"2.1"等序号，
 % 因此不再叠加自动编号（否则会渲染成 "1 一、核心名词" 这种重复）
@@ -308,13 +313,15 @@ def table_fix(tex):
             for mth in maths:
                 mm = re.sub(r'\\[A-Za-z]+\*?', '', mth)     # 去命令名，保留内容
                 mm = re.sub(r'[{}\\^_~]', '', mm)
-                n += max(1, len(mm)) * 1.4
+                n += max(1, len(mm)) * 1.7
             return n
 
         col_w = [0] * ncol
+        col_cells = [[] for _ in range(ncol)]
         for r in rows_hidden:          # 用占位符状态统计，避免 cases 的 & 干扰
             cells = re.split(r'(?<!\\)&', r)
             for ci, c in enumerate(cells[:ncol]):
+                col_cells[ci].append(c.strip())
                 if c.strip().startswith(r"\#") or c.strip() in ("#",):
                     continue
                 # 占位符按其原始数学环境的宽度折算（cases 公式很宽）
@@ -327,16 +334,37 @@ def table_fix(tex):
                 col_w[ci] = max(col_w[ci], vis_len(c2))
         total_w = sum(col_w) or ncol
         # 映射到 \hsize 相对值：每列 hsize 系数之和为 ncol（tabularx 约定）
-        MINR, MAXR = 0.62, 2.8
+        MINR, MAXR = 0.85, 2.4
         ratios = []
         for w in col_w:
             r0 = ncol * (w / total_w) if total_w else 1.0
             ratios.append(max(MINR, min(MAXR, r0)))
+
+        # 判断每列该左对齐还是居中：
+        #   · 表头是 # / 序号 → 窄列 + 居中
+        #   · 整列几乎都是纯行内公式 → 居中（booktabs 表的惯例，比左对齐好看）
+        def is_num_col(ci):
+            hdr = col_cells[ci][0] if col_cells[ci] else ""
+            return hdr.strip() in ("#", r"\#", "序号", "编号")
+
+        def is_math_col(ci):
+            body = [c for c in col_cells[ci][1:] if c.strip()]
+            if not body:
+                return False
+            pure = sum(1 for c in body if re.fullmatch(r'\s*\\\(.*\\\)\s*', c, re.S))
+            return pure >= 0.75 * len(body)
+
+        for ci in range(ncol):
+            if is_num_col(ci):
+                ratios[ci] = 0.40          # 数字列压到最窄
+
         s = sum(ratios)
         ratios = [r * ncol / s for r in ratios]
-        spec = "".join(
-            r">{\raggedright\arraybackslash\hsize=%.3f\hsize}X" % rt for rt in ratios
-        )
+        specs = []
+        for ci, rt in enumerate(ratios):
+            align = "\\centering" if (is_num_col(ci) or is_math_col(ci)) else "\\raggedright"
+            specs.append(r">{%s\arraybackslash\hsize=%.3f\hsize}X" % (align, rt))
+        spec = "".join(specs)
 
         # 第一行当表头，后面补 \midrule
         # 注意：按 \\ 切分时行尾的 \\ 被吃掉了，这里每行重新补回
@@ -351,18 +379,30 @@ def table_fix(tex):
         for r in cleaned:
             for c in re.split(r'(?<!\\)&', r):
                 max_cell = max(max_cell, vis_len(c))
-        if max_cell > 150:
-            fsize, tsep = r"\scriptsize", "2.2pt"
-        elif max_cell > 100:
-            fsize, tsep = r"\footnotesize", "2.8pt"
+        # 字号与留白：宁可多占一页，也不要挤成一团
+        if max_cell > 190:
+            fsize, tsep, astretch = r"\scriptsize", "3.2pt", "1.45"
+        elif max_cell > 140:
+            fsize, tsep, astretch = r"\footnotesize", "3.8pt", "1.42"
+        elif max_cell > 90:
+            fsize, tsep, astretch = r"\footnotesize", "4.4pt", "1.38"
         else:
-            fsize, tsep = r"\small", "3.2pt"
-        new = ("\\begin{center}\n"
-               "\\begingroup%s\\setlength{\\tabcolsep}{%s}\n"
-               "\\begin{tabularx}{\\linewidth}{@{}%s@{}}\n"
-               "\\toprule\n%s\\bottomrule\n"
-               "\\end{tabularx}\n\\endgroup\n\\end{center}\n"
-               % (fsize, tsep, spec, body_rows + "\n"))
+            fsize, tsep, astretch = r"\small", "4.4pt", "1.34"
+
+        # 行与行之间加细横线，避免长表看串行（booktabs 的 specialrule 不额外占高度）
+        body = "\n\\rowrule\n".join(rest)
+
+        # 用 xltabular：既像 tabularx 一样自动分配列宽，又像 longtable 一样能跨页
+        # （之前用 tabularx，长表无法断页，只能整体推到下一页，留下大片空白）
+        new = ("\\begingroup%s\\setlength{\\tabcolsep}{%s}%%\n"
+               "\\renewcommand{\\arraystretch}{%s}%%\n"
+               "\\begin{xltabular}{\\linewidth}{@{}%s@{}}\n"
+               "\\toprule\n%s\\midrule\n\\endhead\n"
+               "%s\n"
+               "\\bottomrule\n"
+               "\\end{xltabular}%%\n"
+               "\\endgroup\n\\par\\vspace{0.5em}\n"
+               % (fsize, tsep, astretch, spec, head, body))
         out.append(tex[i:j])
         out.append(new)
         n_fixed += 1
