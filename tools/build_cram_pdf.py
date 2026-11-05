@@ -40,6 +40,7 @@ PREAMBLE = r"""\documentclass[UTF8,a4paper,zihao=5]{ctexart}
 \usepackage{mathrsfs}
 \usepackage{booktabs,longtable,array,tabularx,multirow,makecell}
 \usepackage{enumitem}
+\usepackage{needspace}
 \usepackage{xcolor}
 \usepackage{fancyhdr}
 \usepackage[colorlinks,linkcolor=blue!50!black,urlcolor=blue!50!black,
@@ -124,8 +125,8 @@ TITLE = r"""\begin{document}
 \begin{center}
 \begin{minipage}{0.90\linewidth}
 \small\color{black!72}
-\textbf{用法}\quad 这是一份考前突击用的浓缩笔记：只有概念、公式、性质与成立条件，
-\textbf{不含例题、练习与插图}。建议只看表格与标 \warnsym{} 的条件；
+\textbf{用法}\quad 这是一份考前突击用的浓缩笔记：只有概念、公式、性质、成立条件与\textbf{题型解法}，
+\textbf{不含例题、练习与插图}。建议只看表格、标 \warnsym{} 的条件，以及每章末尾的「题型与解法」；
 遇到看不懂的地方，回完整笔记查上下文。\\[0.6em]
 \textbf{来源}\quad 每篇开头标注对应课件与页数；完整版与分篇笔记见
 \href{https://github.com/Albert-Guterres-Pluto/bupt-signal-notes}{GitHub: bupt-signal-notes}。\\[0.6em]
@@ -377,9 +378,9 @@ def postprocess(body):
                   lambda m: ("\\partsep\\section*{%s}\\addcontentsline{toc}{section}{%s}"
                              "\\markboth{%s}{}\n" % (m.group(1), m.group(1), m.group(1))), body)
     body = re.sub(r'\\subsection\{(.+?)\}\\label\{[^}]*\}',
-                  lambda m: "\\subsection{%s}" % m.group(1), body)
+                  lambda m: "\\needspace{3\\baselineskip}\\subsection{%s}" % m.group(1), body)
     body = re.sub(r'\\subsubsection\{(.+?)\}\\label\{[^}]*\}',
-                  lambda m: "\\subsubsection{%s}" % m.group(1), body)
+                  lambda m: "\\needspace{2.5\\baselineskip}\\subsubsection{%s}" % m.group(1), body)
     body = body.replace(r"\tightlist", "")
     # 首次出现的 pgbreak 去掉（紧跟标题页，已有 clearpage）
     body = body.lstrip()
@@ -411,6 +412,11 @@ SYM_MAP = [
     ("\u2461", r"\textbf{(2)}"),           # ②
     ("\u2462", r"\textbf{(3)}"),           # ③
     ("\u2463", r"\textbf{(4)}"),           # ④
+    ("\u2464", r"\textbf{(5)}"),           # ⑤
+    ("\u2465", r"\textbf{(6)}"),           # ⑥
+    ("\u2466", r"\textbf{(7)}"),           # ⑦
+    ("\u2467", r"\textbf{(8)}"),           # ⑧
+    ("\u2468", r"\textbf{(9)}"),           # ⑨
     ("\u2605", r"$\bigstar$"),             # ★（雅黑无此字形，用数学符号）
 ]
 

@@ -121,7 +121,7 @@ def main():
     body.append("")
 
     # ---- 目录 ----
-    toc.append(f"## 目录（共 3 篇 {total_ch} 章）")
+    toc.append(f"## 目录（共 {len(entries)} 篇 {total_ch} 章）")
     toc.append("")
     idx = 0
     for deck, deck_title, src, files in entries:
